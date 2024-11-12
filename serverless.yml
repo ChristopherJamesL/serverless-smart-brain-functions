@@ -1,0 +1,49 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: justhangingaround
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: rankly-lambda 
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  stage: prod
+  apiGateway:
+    binaryMediaTypes:
+      - image/jpeg
+      - image/png
+      - image/gif
+      - image/avif
+      - image/webp
+      - application/octet-stream # General binary data
+      - image/svg+xml # Optional, for SVG images
+  environment:
+    BUCKET_NAME: smart-brain-profile-picture
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+        - s3:PutObjectAcl
+        - s3:ListBucket
+      Resource: 
+        - arn:aws:s3:::smart-brain-profile-picture
+        - arn:aws:s3:::smart-brain-profile-picture/*
+
+functions:
+  rank:
+    handler: handler.rank
+    events:
+      - http:
+          path: rank
+          method: get
+
+  uploadProfilePicture:
+    handler: uploadHandler.uploadProfilePicture
+    events:
+      - http:
+          path: upload
+          method: post
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
